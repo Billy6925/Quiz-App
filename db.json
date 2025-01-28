@@ -1,1 +1,32 @@
-{}
+{
+    
+        "categories": [
+          { "id": 1, "name": "Science" },
+          { "id": 2, "name": "History" }
+        ],
+        "questions": [
+          {
+            "id": 1,
+            "categoryId": 1,
+            "question": "What is the chemical symbol for water?",
+            "options": ["H2O", "O2", "CO2", "H2"],
+            "answer": "H2O"
+          },
+          {
+            "id": 1,
+            "categoryId": 1,
+            "question": "What is the chemical symbol for water?",
+            "options": ["H2O", "O2", "CO2", "H2"],
+            "answer": "H2O"
+          },
+          {
+            "id": 1,
+            "categoryId": 1,
+            "question": "What is the chemical symbol for water?",
+            "options": ["H2O", "O2", "CO2", "H2"],
+            "answer": "H2O"
+          }
+        ]
+      
+      
+}
