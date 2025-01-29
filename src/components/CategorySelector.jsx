@@ -1,4 +1,9 @@
-export default function CategorySelector() {
+import { useState } from 'react';
+
+export default function CategorySelector() { 
+    const [categories, setCategories] = useState([]);
+
+    
     return (
       <div>
         <h2>Select a Category</h2>
