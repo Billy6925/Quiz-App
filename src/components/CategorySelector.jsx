@@ -28,9 +28,13 @@ export default function CategorySelector() {
       <div>
         <h2>Select a Category</h2>
         <div>
+        
         {categories.map(cat => (
-        <button key={cat.id}>{cat.name}</button>
-      ))}
+  <button key={cat.id} onClick={() => handleCategorySelect(cat.id)}>
+    {cat.name}
+  </button>
+))}
+
         </div>
       </div>
     );
