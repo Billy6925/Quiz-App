@@ -11,6 +11,19 @@ export default function CategorySelector() {
           .catch(error => console.error('Error:', error));
       }, []);
 
+      const handleCategorySelect = async (categoryId) => {
+        try {
+          resetQuiz();
+          const response = await fetch(`http://localhost:3001/questions?categoryId=${categoryId}`);
+          const data = await response.json();
+          setQuestions(data);
+          setCategory(categoryId);
+        } catch (error) {
+          console.error('Error:', error);
+        }
+      };
+      
+
     return (
       <div>
         <h2>Select a Category</h2>
