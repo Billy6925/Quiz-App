@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect, useContext } from 'react';
+import { QuizContext } from '../App';
 
 export default function CategorySelector() { 
     const [categories, setCategories] = useState([]);
