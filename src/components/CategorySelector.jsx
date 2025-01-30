@@ -1,8 +1,11 @@
 import { useState, useEffect, useContext } from 'react';
 import { QuizContext } from '../App';
+import { useNavigate } from 'react-router-dom';
 
 export default function CategorySelector() { 
     const [categories, setCategories] = useState([]);
+    const { setCategory, setQuestions, resetQuiz } = useContext(QuizContext);
+  const navigate = useNavigate();
 
     useEffect(() => {
         fetch('http://localhost:3001/categories')
@@ -18,6 +21,7 @@ export default function CategorySelector() {
           const data = await response.json();
           setQuestions(data);
           setCategory(categoryId);
+          navigate('/quiz');
         } catch (error) {
           console.error('Error:', error);
         }
