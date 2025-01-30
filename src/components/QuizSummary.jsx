@@ -15,9 +15,25 @@ function QuizSummary() {
 <header>
     <NavBar/>
 </header>
-<main>
-    
+<div>
+    <h2>Quiz Summary</h2>
+    {quizHistory.map((quiz, index) => (
+<main key={index}>
+<h3>Quiz{quizHistory.length - index}</h3>
+<p>Categories:{quiz.categories.join(',')}</p>
+<p>Questions Completed{quiz.questionsCompleted}</p>
+<p>Correct Answers: {quiz.correctAnswers}</p>
+<ul>
+    {
+        quiz.answers.map((answer, index) => (
+    <li key={index}>
+question{index +1}: {answer.userAnswer} - Correct:{answer.correctAnswer}
+    </li>
+))}
+</ul>
 </main>
+))}
+</div>
 
         </>
     )
