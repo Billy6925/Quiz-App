@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from "react";
 import NavBar from "./NavBar";
 
-function QuizSummary() {
+function QuizSummary({quizHistory}) {
     const [quizHistory, setQuizHistory] = useState([])
     const [category, setCategory] = useState([])
 
