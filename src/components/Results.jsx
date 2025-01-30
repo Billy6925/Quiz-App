@@ -1,7 +1,7 @@
-import { Button } from 'bootstrap';
+import { Button } from 'react bootstrap';
 import React, {useState, useEffect} from 'react';
 
-function Result() {
+function Result({restartQuiz}) {
     const [score, setScore] = useState(0);
     const [correctAnswer, setCorrectAnswer] = useState([])
 
@@ -20,13 +20,13 @@ function Result() {
         <h2>Final score: {score}</h2>
         <h2>Correct Answers</h2>
         <ul>
-        {correctAnswer.map((answer, index => {
+        {correctAnswer.map((answer, index) => {
 <li key ={index}>
     Question {index +1}: {answer}
 </li>
-        }))}
+        })}
         </ul>
-        <Button onClick={RestartQuiz}>Restart Quiz</Button>
+        <Button onClick={restartQuiz}>Restart Quiz</Button>
         </>
     )
 }
