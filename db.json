@@ -1,0 +1,86 @@
+{
+    "categories": [
+      { "id": 1, "name": "Science" },
+      { "id": 2, "name": "History" },
+      { "id": 3, "name": "Computer"}
+    ],
+    "questions": [
+      {
+        "id": 1,
+        "categoryId": 1,
+        "question": "What is the chemical symbol for water?",
+        "options": ["H2O", "O2", "CO2", "H2"],
+        "answer": "H2O"
+      },
+      {
+        "id": 2,
+        "categoryId": 2,
+        "question": "How many counties do we have in Kenya?",
+        "options": ["60", "23", "47", "50"],
+        "answer": "47"
+      },
+      {
+        "id": 3,
+        "categoryId": 3,
+        "question": "Which of the options below is a Computer Programming Language?",
+        "options": ["Python", "Ubuntu", "Linux", "Windows"],
+        "answer": "Python"
+      },
+      {
+        "id": 4,
+        "categoryId": 1,
+        "question": "What is the chemical symbol for oxygen?",
+        "options": ["H2O", "O2", "CO2", "H2"],
+        "answer": "02"
+      },
+      {
+        "id": 5,
+        "categoryId": 2,
+        "question": "Who is the president of Kenya?",
+        "options": ["Uhuru Kenyatta", "William Ruto", "Daniel Moi", "Barrack Obama"],
+        "answer": "William Ruto"
+      },
+      {
+        "id": 6,
+        "categoryId": 3,
+        "question": "Which of the options below is an Operating System ?",
+        "options": ["Linux", "Excel", "Java", "Spreadsheet"],
+        "answer": "Linux"
+      },
+
+      {
+        "id": 7,
+        "categoryId": 1,
+        "question": "What is the chemical symbol for Hydrogen?",
+        "options": ["H2O", "O2", "CO2", "H2"],
+        "answer": "H2"
+      },
+
+      {
+        "id": 8,
+        "categoryId": 2,
+        "question": "Which of the animals below is not among the big 5?",
+        "options": ["Lion", "Elephant", "Rhino", "Hippopotamus"],
+        "answer": "HIppopotamus"
+      },
+
+      {
+        "id": 9,
+        "categoryId": 3,
+        "question": "Which of the programming languages below is used for backend?",
+        "options": ["C", "C++", "Java", "React"],
+        "answer": "Java"
+      },
+
+      {
+        "id": 10,
+        "categoryId": 1,
+        "question": "What is the chemical symbol for carbon dioxide?",
+        "options": ["H2O", "O2", "CO2", "H2"],
+        "answer": "C02"
+      }
+
+    ]
+  
+  
+}
