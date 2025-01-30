@@ -1,9 +1,5 @@
 import { useRouteError } from "react-router-dom";
 import NavBar from "./Navbar";
-import QuizQuestion from "./QuizQuestion";
-import QuizSummary from "./QuizSummary";
-import Result from "./Results";
-import CategorySelector from "./CategorySelector";
 
 function ErrorPage() {
 const error = useRouteError();
