@@ -1,3 +1,4 @@
+
 import Navbar from "./components/Navbar";
 import CategorySelector from "./components/CategorySelector";
 import QuizQuestions from "./components/QuizQuestion";
@@ -52,3 +53,4 @@ return (
 
 );
 export default App;
+
