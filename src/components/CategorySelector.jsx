@@ -17,7 +17,8 @@ export default function CategorySelector() {
     const handleCategorySelect = async (categoryId) => {
         try {
             resetQuiz();
-            const response = await fetch(`http://localhost:3000/questions?categoryId=${categoryId}`);
+            const response = await fetch('http://localhost:3000/questions?categoryId=' + categoryId)
+
             const data = await response.json();
             setQuestions(data);
             setCategory(categoryId);
@@ -31,8 +32,8 @@ export default function CategorySelector() {
         <div>
             <h2>Select a Category</h2>
             <div>
-                {categories.map(cat => (
-                    <button key={cat.id} onClick={() => handleCategorySelect(cat.id)}>
+                {categories.map((cat,index) => (
+                    <button key={index} onClick={() => handleCategorySelect(cat.id)}>
                         {cat.name}
                     </button>
                 ))}

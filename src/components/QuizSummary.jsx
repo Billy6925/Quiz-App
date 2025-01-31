@@ -3,7 +3,7 @@ import Navbar from "./Navbar.jsx";
 
 function QuizSummary() {
     const [category, setCategory] = useState([]);
-    const [quizHistory, setQuizHistory] = useState([]); 
+    const [quizHistory, setQuizHistory] = useState([]);
 
     useEffect(() => {
         fetch("http://localhost:3000/questions")
@@ -22,26 +22,31 @@ function QuizSummary() {
 
     return (
         <>
+            {/* Render Navbar only once here */}
             <header>
-                <Navbar />
+               
             </header>
             <div>
                 <h2>Quiz Summary</h2>
-                {quizHistory.map((quiz, index) => (
-                    <main key={index}>
-                        <h3>Quiz {quizHistory.length - index}</h3>
-                        <p>Categories: {(quiz.categories || []).join(', ')}</p>
-                        <p>Questions Completed {quiz.questionsCompleted || 0}</p>
-                        <p>Correct Answers: {quiz.correctAnswers || 0}</p>
-                        <ul>
-                            {(quiz.answers || []).map((answer, index) => (
-                                <li key={index}>
-                                    question{index + 1}: {answer.userAnswer || 'N/A'} - Correct: {answer.correctAnswer || 'N/A'}
-                                </li>
-                            ))}
-                        </ul>
-                    </main>
-                ))}
+                {quizHistory.length > 0 ? (
+                    quizHistory.map((quiz, index) => (
+                        <main key={index}>
+                            <h3>Quiz {quizHistory.length - index}</h3>
+                            <p>Categories: {(quiz.categories || []).join(', ')}</p>
+                            <p>Questions Completed {quiz.questionsCompleted || 0}</p>
+                            <p>Correct Answers: {quiz.correctAnswers || 0}</p>
+                            <ul>
+                                {(quiz.answers || []).map((answer, index) => (
+                                    <li key={index}>
+                                        question{index + 1}: {answer.userAnswer || 'N/A'} - Correct: {answer.correctAnswer || 'N/A'}
+                                    </li>
+                                ))}
+                            </ul>
+                        </main>
+                    ))
+                ) : (
+                    <p>No quiz history available.</p>
+                )}
             </div>
         </>
     );
