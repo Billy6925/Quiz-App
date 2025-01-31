@@ -1,5 +1,4 @@
 import { QuizProvider } from './contexts/QuizContext';
-import { useState, useEffect } from 'react';
 
 import Navbar from "./components/Navbar";
 import CategorySelector from "./components/CategorySelector";

@@ -31,7 +31,7 @@
             "categoryId": 1,
             "question": "What is the chemical symbol for oxygen?",
             "options": ["H2O", "O2", "CO2", "H2"],
-            "answer": "O2"
+            "correctAnswer": "O2"
         },
         {
             "id": 5,

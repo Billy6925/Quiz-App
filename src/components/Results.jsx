@@ -2,90 +2,95 @@ import { Button } from "react-bootstrap";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-function Result({ restartQuiz }) {
-    const [questions, setQuestions] = useState([]);
-    const [userAnswers, setUserAnswers] = useState([]);
-    const [score, setScore] = useState(0);
-    const [percentage, setPercentage] = useState(0);
-    const [results, setResults] = useState([]);
+function Result() {
+  const [questions, setQuestions] = useState([]);
+  const [userAnswers, setUserAnswers] = useState([]);
+  const [score, setScore] = useState(0);
+  const [percentage, setPercentage] = useState(0);
+  const [results, setResults] = useState([]);
 
-    const navigate = useNavigate(); // Navigation function
+  const navigate = useNavigate();
 
-    // Fetch questions and user answers from localStorage
-    useEffect(() => {
-        const storedAnswers = JSON.parse(localStorage.getItem("userAnswers")) || [];
-        setUserAnswers(storedAnswers);
+  useEffect(() => {
+    const storedAnswers = JSON.parse(localStorage.getItem("userAnswers")) || [];
+    const storedQuizData = JSON.parse(localStorage.getItem("lastQuizData")) || {};
+    
+    setUserAnswers(storedAnswers);
+    setQuestions(storedQuizData.questions || []);
+    setResults(storedQuizData.results || []);
 
-        const storedQuizData = JSON.parse(localStorage.getItem("lastQuizData"));
-        if (storedQuizData) {
-            setResults(storedQuizData.results || []);
-        }
+    // Calculate score based on stored results
+    if (storedQuizData.results) {
+      const correctCount = storedQuizData.results.filter(r => r.isCorrect).length;
+      const total = storedQuizData.results.length;
+      setScore(correctCount);
+      setPercentage(((correctCount / total) * 100).toFixed(2));
+    }
+    
+    // Save quiz results to history
+    completeQuiz(storedQuizData);
+  }, []);
 
-        fetch("http://localhost:3000/questions")
-            .then((response) => response.json())
-            .then((data) => {
-                setQuestions(data);
-                calculateScore(data, storedAnswers);
-            })
-            .catch((error) => console.error("Error fetching questions:", error));
-    }, []);
+  // Function to save quiz history
+  const completeQuiz = (quizData) => {
+    if (!quizData.results) return; // Prevent saving empty quiz data
 
-    // Calculate score and percentage
-    const calculateScore = (questions, userAnswers) => {
-        let correctCount = 0;
-        const resultsArray = userAnswers.map((userAnswer, index) => {
-            const correctAnswer = questions[index]?.correctAnswer;
-            const isCorrect = userAnswer === correctAnswer;
-            if (isCorrect) correctCount++;
-
-            return {
-                question: questions[index]?.question,
-                userAnswer,
-                correctAnswer,
-                isCorrect,
-            };
-        });
-
-        const totalQuestions = questions.length;
-        const calculatedPercentage = totalQuestions > 0 ? (correctCount / totalQuestions) * 100 : 0;
-
-        setScore(correctCount);
-        setPercentage(calculatedPercentage.toFixed(2));
-        setResults(resultsArray);
+    const newQuizData = {
+      questions: quizData.questions,
+      results: quizData.results,
     };
 
-    return (
-        <>
-            <h2>Final Score: {score} / {questions.length}</h2>
-            <h2>Percentage: {percentage}%</h2>
-            <h2>Results:</h2>
-            <ul>
-                {results.map((result, index) => (
-                    <li key={index}>
-                        <strong>Question {index + 1}: </strong>
-                        {result.question}
-                        <br />
-                        <strong>Your Answer: </strong>{result.userAnswer} 
-                        <span style={{ color: result.isCorrect ? "green" : "red", fontWeight: "bold", marginLeft: "10px" }}>
-                            {result.isCorrect ? "(Correct)" : "(Incorrect)"}
-                        </span>
-                        <br />
-                        <strong>Correct Answer: </strong>{result.correctAnswer}
-                    </li>
-                ))}
-            </ul>
+    // Get existing quiz history from localStorage
+    const existingHistory = JSON.parse(localStorage.getItem("quizHistory")) || [];
 
-            {/* Buttons for navigation */}
-            <Button variant="primary" onClick={() => navigate("/categories")}>
-                Try Another Quiz
-            </Button>
-            <Button variant="secondary" onClick={() => navigate("/quiz-history")}>
-                View Summary
-            </Button>
-            
-           
-        </>
-    );
+    // Add the new quiz data to the history
+    existingHistory.unshift(newQuizData); // Unshift to add to the beginning (most recent first)
+
+    // Store the updated history in localStorage
+    localStorage.setItem("quizHistory", JSON.stringify(existingHistory));
+
+    // Clear current quiz state
+    localStorage.removeItem('quizState');
+  };
+
+  return (
+    <div className="p-6">
+      <h2 className="text-2xl font-bold mb-4">Final Score: {score} / {questions.length}</h2>
+      <h2 className="text-xl mb-4">Percentage: {percentage}%</h2>
+      <h2 className="text-xl mb-4">Results:</h2>
+      
+      <ul className="space-y-4">
+        {results.map((result, index) => (
+          <li key={index} className="border p-4 rounded">
+            <strong>Question {index + 1}: </strong>
+            {result.question}
+            <br />
+            <strong>Your Answer: </strong>
+            <span style={{ 
+              color: result.isCorrect ? "green" : "red",
+              fontWeight: "bold"
+            }}>
+              {result.userAnswer}
+              {result.isCorrect ? " ✓" : " ✗"}
+            </span>
+            <br />
+            {!result.isCorrect && (
+              <><strong>Correct Answer: </strong>{result.correctAnswer}<br /></>
+            )}
+          </li>
+        ))}
+      </ul>
+
+      <div className="mt-6 space-x-4">
+        <Button variant="primary" onClick={() => navigate("/categories")}>
+          Try Another Quiz
+        </Button>
+        <Button variant="secondary" onClick={() => navigate("/summary")}>
+          View Summary
+        </Button>
+      </div>
+    </div>
+  );
 }
 
 export default Result;

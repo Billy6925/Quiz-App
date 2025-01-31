@@ -1,196 +1,146 @@
-import React, { useEffect, useState } from "react";
-import { QuizContext } from "../contexts/QuizContext";
+import React, { useEffect, useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import { QuizContext } from '../contexts/QuizContext';
 
 const QuizQuestion = () => {
-  // State management
-  const [questions, setQuestions] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState(""); // Track selected answer
-  const [loading, setLoading] = useState(true);
-  const [completed, setCompleted] = useState(false);
-  const [error, setError] = useState(null);
-  const [results, setResults] = useState([]); // Store results to show at the end
-  const [userAnswers, setUserAnswers] = useState([]);
-  const [score, setScore] = useState(0);
-  const [percentage, setPercentage] = useState(0);
+    const { questions } = useContext(QuizContext);
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [selectedAnswer, setSelectedAnswer] = useState("");
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [userAnswers, setUserAnswers] = useState([]);
+    const [completed, setCompleted] = useState(false);
+    const navigate = useNavigate();
 
-  // Fetch questions from API
-  useEffect(() => {
-    const fetchQuestions = async () => {
-      try {
-        const response = await fetch("http://localhost:3000/questions");
-        if (!response.ok) {
-          throw new Error("Failed to fetch questions");
+    useEffect(() => {
+        // Load saved state from localStorage if it exists
+        const savedState = localStorage.getItem('quizState');
+        if (savedState) {
+            const { currentIndex: savedIndex, userAnswers: savedAnswers } = JSON.parse(savedState);
+            setCurrentIndex(savedIndex);
+            setUserAnswers(savedAnswers);
+            setSelectedAnswer(savedAnswers[savedIndex] || "");
         }
-        const data = await response.json();
-        setQuestions(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
         setLoading(false);
-      }
+    }, []);
+
+    // Save state to localStorage whenever it changes
+    useEffect(() => {
+        if (!loading && questions.length > 0) {
+            localStorage.setItem('quizState', JSON.stringify({
+                currentIndex,
+                userAnswers,
+            }));
+        }
+    }, [currentIndex, userAnswers, questions, loading]);
+
+    const handleAnswerSelection = (option) => {
+        setSelectedAnswer(option);
+        // Update userAnswers immediately when selection changes
+        const newAnswers = [...userAnswers];
+        newAnswers[currentIndex] = option;
+        setUserAnswers(newAnswers);
     };
 
-    fetchQuestions();
-  }, []);
+    const handleNext = () => {
+        if (selectedAnswer) {
+            if (currentIndex < questions.length - 1) {
+                setCurrentIndex(currentIndex + 1);
+                setSelectedAnswer(userAnswers[currentIndex + 1] || "");
+            } else {
+                completeQuiz();
+            }
+        }
+    };
 
-  // Save quiz data to localStorage when completed
-  useEffect(() => {
-    if (completed) {
-      localStorage.setItem("quizData", JSON.stringify({ questions, results, completed }));
-    }
-  }, [completed, results]);
+    const handlePrevious = () => {
+        if (currentIndex > 0) {
+            setCurrentIndex(currentIndex - 1);
+            setSelectedAnswer(userAnswers[currentIndex - 1] || "");
+        }
+    };
 
-  // Function to handle answer selection and save it to localStorage
-  const handleAnswerSelection = (answer) => {
-    const updatedAnswers = [...userAnswers];
-    updatedAnswers[currentIndex] = answer;
-    setUserAnswers(updatedAnswers);
-
-    // Save answers in localStorage
-    localStorage.setItem("userAnswers", JSON.stringify(updatedAnswers));
-  };
-
-  // Handle Next Button
-  const handleNext = () => {
-    if (selectedAnswer) {
-      const currentQuestion = questions[currentIndex];
-      const isCorrect = selectedAnswer === currentQuestion.correctAnswer;
-
-      setResults((prevResults) => [
-        ...prevResults,
-        {
-          question: currentQuestion.question,
-          userAnswer: selectedAnswer,
-          correctAnswer: currentQuestion.correctAnswer,
-          isCorrect,
-        },
-      ]);
-
-      // Save the selected answer
-      handleAnswerSelection(selectedAnswer);
-
-      if (currentIndex < questions.length - 1) {
-        setCurrentIndex(currentIndex + 1);
-        setSelectedAnswer(""); // Reset selected answer for the next question
-      } else {
-        // Calculate final score and percentage
-        const correctCount = results.filter((r) => r.isCorrect).length + (isCorrect ? 1 : 0);
-        const calculatedPercentage = ((correctCount / questions.length) * 100).toFixed(2);
-
-        setScore(correctCount);
-        setPercentage(calculatedPercentage);
+    const completeQuiz = () => {
         setCompleted(true);
-        alert("Quiz Completed! Data saved to localStorage.");
-      }
-    }
-  };
+        // Save final quiz data to localStorage
+        localStorage.setItem("lastQuizData", JSON.stringify({
+            questions: questions,
+            results: questions.map((q, index) => ({
+                question: q.question,
+                userAnswer: userAnswers[index],
+                correctAnswer: q.correctAnswer,
+                isCorrect: userAnswers[index] === q.correctAnswer
+            }))
+        }));
+        // Clear quiz state
+        localStorage.removeItem('quizState');
+        navigate("/results");
+    };
 
-  // Handle Previous Button
-  const handlePrevious = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-      setSelectedAnswer(""); // Reset selected answer when going back
-    }
-  };
+    if (loading) return <div>Loading questions...</div>;
+    if (error) return <div>Error: {error}</div>;
+    if (!questions || questions.length === 0) return <div>No questions available</div>;
 
-  // Handle Answer Selection
-  const handleAnswerChange = (option) => {
-    setSelectedAnswer(option);
-  };
+    const progress = ((currentIndex + 1) / questions.length) * 100;
+    const currentQuestion = questions[currentIndex];
 
-  // Restart Quiz
-  const handleRestartQuiz = () => {
-    localStorage.removeItem("userAnswers"); // Clear stored answers
-    localStorage.removeItem("quizData"); // Clear saved quiz data
-    setCurrentIndex(0);
-    setSelectedAnswer("");
-    setCompleted(false);
-    setResults([]);
-    setUserAnswers([]);
-    setScore(0);
-    setPercentage(0);
-  };
+    return (
+        <div className="max-w-2xl mx-auto p-6">
+            {/* Progress bar */}
+            <div className="mb-6">
+            <div className="w-full h-3 bg-gray-200 rounded-full">
+    <div 
+        className="progress-bar"
+        style={{ width: `${progress}%` }}
+    />
+</div>
 
-  // Loading State
-  if (loading) {
-    return <div>Loading questions...</div>;
-  }
+                <div className="text-center mt-2 text-gray-600">
+                    Question {currentIndex + 1} of {questions.length}
+                </div>
+            </div>
 
-  // Error State
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
+            {/* Question */}
+            <div className="mb-8">
+                <h2 className="text-xl font-semibold mb-4">{currentQuestion.question}</h2>
+                <ul className="space-y-3">
+                    {currentQuestion.options.map((option, index) => (
+                        <li key={index}>
+                            <label className="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="answer"
+                                    value={option}
+                                    checked={selectedAnswer === option}
+                                    onChange={() => handleAnswerSelection(option)}
+                                    className="mr-3"
+                                />
+                                <span>{option}</span>
+                            </label>
+                        </li>
+                    ))}
+                </ul>
+            </div>
 
-  return (
-    <div>
-      {/* Progress indicator */}
-      <div>
-        Question {currentIndex + 1} of {questions.length}
-      </div>
-
-      {/* Quiz content */}
-      {!completed ? (
-        <div>
-          <h2>{questions[currentIndex].question}</h2>
-          <ul>
-            {questions[currentIndex].options.map((option, index) => (
-              <li key={index}>
-                <label>
-                  <input
-                    type="radio"
-                    name="answer"
-                    value={option}
-                    checked={selectedAnswer === option}
-                    onChange={() => handleAnswerChange(option)}
-                  />
-                  {option}
-                </label>
-              </li>
-            ))}
-          </ul>
+            {/* Navigation buttons */}
+            <div className="flex justify-between mt-6">
+                <button
+                    onClick={handlePrevious}
+                    disabled={currentIndex === 0}
+                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 transition-colors"
+                >
+                    Previous
+                </button>
+                <button
+                    onClick={handleNext}
+                    disabled={!selectedAnswer}
+                    className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-600 transition-colors"
+                >
+                    {currentIndex === questions.length - 1 ? "Finish" : "Next"}
+                </button>
+            </div>
         </div>
-      ) : (
-        <div>
-          <h2>Quiz Completed!</h2>
-          <h3>Final Score: {score} / {questions.length}</h3>
-          <h3>Percentage: {percentage}%</h3>
-
-          <h3>Results:</h3>
-          <ul>
-            {results.map((result, index) => (
-              <li key={index}>
-                <strong>Question {index + 1}: </strong>
-                {result.question}
-                <br />
-                <strong>Your Answer: </strong>{result.userAnswer} 
-                <span style={{ color: result.isCorrect ? "green" : "red", fontWeight: "bold", marginLeft: "10px" }}>
-                  {result.isCorrect ? "(Correct)" : "(Incorrect)"}
-                </span>
-                <br />
-                <strong>Correct Answer: </strong>{result.correctAnswer}
-              </li>
-            ))}
-          </ul>
-
-          <button onClick={handleRestartQuiz}>Restart Quiz</button>
-        </div>
-      )}
-
-      {/* Navigation Buttons */}
-      <div>
-        <button onClick={handlePrevious} disabled={currentIndex === 0}>
-          Previous
-        </button>
-
-        {!completed && (
-          <button onClick={handleNext}>
-            {currentIndex === questions.length - 1 ? "Finish" : "Next"}
-          </button>
-        )}
-      </div>
-    </div>
-  );
+    );
 };
 
 export default QuizQuestion;

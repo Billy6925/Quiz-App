@@ -2,29 +2,18 @@ import React, { useState, useEffect } from "react";
 import Navbar from "./Navbar.jsx";
 
 function QuizSummary() {
-    const [category, setCategory] = useState([]);
     const [quizHistory, setQuizHistory] = useState([]);
 
     useEffect(() => {
-        fetch("http://localhost:3000/questions")
-            .then(response => response.json())
-            .then(data => {
-                console.log('Fetched quiz history:', data); // Log the data to inspect its structure
-                setQuizHistory(data || []); // Ensure it's an array
-            })
-            .catch(error => console.error('Error fetching quiz history:', error));
-
-        fetch("http://localhost:3000/categories")
-            .then(response => response.json())
-            .then(data => setCategory(data))
-            .catch(error => console.error("Error fetching categories:", error));
+        // Fetch quiz history from localStorage
+        const storedHistory = JSON.parse(localStorage.getItem("quizHistory")) || [];
+        setQuizHistory(Array.isArray(storedHistory) ? storedHistory.reverse() : []);
     }, []);
 
     return (
         <>
-            {/* Render Navbar only once here */}
             <header>
-               
+                
             </header>
             <div>
                 <h2>Quiz Summary</h2>
@@ -32,20 +21,20 @@ function QuizSummary() {
                     quizHistory.map((quiz, index) => (
                         <main key={index}>
                             <h3>Quiz {quizHistory.length - index}</h3>
-                            <p>Categories: {(quiz.categories || []).join(', ')}</p>
-                            <p>Questions Completed {quiz.questionsCompleted || 0}</p>
-                            <p>Correct Answers: {quiz.correctAnswers || 0}</p>
+                            <p>Categories: {(quiz.categories && Array.isArray(quiz.categories)) ? quiz.categories.join(', ') : "No categories available"}</p>
+                            <p>Questions Completed: {quiz.questionsCompleted || (quiz.answers ? quiz.answers.length : 0)}</p>
+                            <p>Correct Answers: {quiz.correctAnswers || (quiz.answers ? quiz.answers.filter(a => a.isCorrect).length : 0)}</p>
                             <ul>
-                                {(quiz.answers || []).map((answer, index) => (
-                                    <li key={index}>
-                                        question{index + 1}: {answer.userAnswer || 'N/A'} - Correct: {answer.correctAnswer || 'N/A'}
+                                {(quiz.answers && Array.isArray(quiz.answers)) ? quiz.answers.map((answer, idx) => (
+                                    <li key={idx}>
+                                        Question {idx + 1}: {answer.userAnswer || 'N/A'} - Correct: {answer.correctAnswer || 'N/A'}
                                     </li>
-                                ))}
+                                )) : <li>No answers recorded.</li>}
                             </ul>
                         </main>
                     ))
                 ) : (
-                    <p>No quiz history available.</p>
+                    <p>No quiz history available. Take a quiz to see your results here!</p>
                 )}
             </div>
         </>
