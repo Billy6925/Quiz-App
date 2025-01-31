@@ -1,5 +1,4 @@
-import React from "react";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";  
 
 
 //define QuickQuestion
@@ -9,6 +8,7 @@ const [questions, setQuestions]=useState([]);
 const [currentIndex, setCurrentIndex] = useState(0);
 const [loading, setLoading] = useState(true);
 const [completed, setCompleted] = useState(false);
+const [error, setError] = useState(null); 
 
 
  // Fetch questions from API
