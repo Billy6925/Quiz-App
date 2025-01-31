@@ -8,7 +8,7 @@ export default function CategorySelector() {
   const navigate = useNavigate();
 
     useEffect(() => {
-        fetch('http://localhost:3001/categories')
+        fetch('http://localhost:5173/categories')
           .then(res => res.json())
           .then(data => setCategories(data))
           .catch(error => console.error('Error:', error));
@@ -17,7 +17,7 @@ export default function CategorySelector() {
       const handleCategorySelect = async (categoryId) => {
         try {
           resetQuiz();
-          const response = await fetch(`http://localhost:3001/questions?categoryId=${categoryId}`);
+          const response = await fetch(`http://localhost:5173/questions?categoryId=${categoryId}`);
           const data = await response.json();
           setQuestions(data);
           setCategory(categoryId);

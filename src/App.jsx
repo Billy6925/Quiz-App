@@ -16,7 +16,7 @@ function App() {
 
     // Fetch categories from JSON
     useEffect(() => {
-        fetch("http://localhost:3001/categories")
+        fetch("http://localhost:3000/categories")
             .then((res) => res.json())
             .then((data) => setCategory(data))
             .catch((error) => console.error("Error fetching categories", error));
@@ -25,7 +25,7 @@ function App() {
     // Fetch questions based on selected category
     useEffect(() => {
         if (selectedCategory) {
-            fetch(`http://localhost:3001/questions?category=${selectedCategory}`)
+            fetch(`http://localhost:3000/questions?category=${selectedCategory}`)
                 .then((res) => res.json())
                 .then((data) => setQuestion(data))
                 .catch((error) => console.error("Error fetching questions", error));
