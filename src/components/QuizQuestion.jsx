@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { QuizContext } from "../contexts/QuizContext";
 
 const QuizQuestion = () => {
   // State management
@@ -9,6 +10,9 @@ const QuizQuestion = () => {
   const [completed, setCompleted] = useState(false);
   const [error, setError] = useState(null);
   const [results, setResults] = useState([]); // Store results to show at the end
+  const [userAnswers, setUserAnswers] = useState([]);
+  const [score, setScore] = useState(0);
+  const [percentage, setPercentage] = useState(0);
 
   // Fetch questions from API
   useEffect(() => {
@@ -33,44 +37,56 @@ const QuizQuestion = () => {
   // Save quiz data to localStorage when completed
   useEffect(() => {
     if (completed) {
-      localStorage.setItem(
-        "quizData",
-        JSON.stringify({
-          questions,
-          currentIndex,
-          completed,
-          results,
-        })
-      );
+      localStorage.setItem("quizData", JSON.stringify({ questions, results, completed }));
     }
   }, [completed, results]);
 
-  // Handlers
+  // Function to handle answer selection and save it to localStorage
+  const handleAnswerSelection = (answer) => {
+    const updatedAnswers = [...userAnswers];
+    updatedAnswers[currentIndex] = answer;
+    setUserAnswers(updatedAnswers);
+
+    // Save answers in localStorage
+    localStorage.setItem("userAnswers", JSON.stringify(updatedAnswers));
+  };
+
+  // Handle Next Button
   const handleNext = () => {
     if (selectedAnswer) {
-      // Store the result for this question
       const currentQuestion = questions[currentIndex];
       const isCorrect = selectedAnswer === currentQuestion.correctAnswer;
+
       setResults((prevResults) => [
         ...prevResults,
         {
           question: currentQuestion.question,
-          selectedAnswer,
-          isCorrect,
+          userAnswer: selectedAnswer,
           correctAnswer: currentQuestion.correctAnswer,
+          isCorrect,
         },
       ]);
-    }
 
-    if (currentIndex < questions.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-      setSelectedAnswer(""); // Reset selected answer for the next question
-    } else {
-      setCompleted(true);
-      alert("Quiz Completed! Data saved to localStorage.");
+      // Save the selected answer
+      handleAnswerSelection(selectedAnswer);
+
+      if (currentIndex < questions.length - 1) {
+        setCurrentIndex(currentIndex + 1);
+        setSelectedAnswer(""); // Reset selected answer for the next question
+      } else {
+        // Calculate final score and percentage
+        const correctCount = results.filter((r) => r.isCorrect).length + (isCorrect ? 1 : 0);
+        const calculatedPercentage = ((correctCount / questions.length) * 100).toFixed(2);
+
+        setScore(correctCount);
+        setPercentage(calculatedPercentage);
+        setCompleted(true);
+        alert("Quiz Completed! Data saved to localStorage.");
+      }
     }
   };
 
+  // Handle Previous Button
   const handlePrevious = () => {
     if (currentIndex > 0) {
       setCurrentIndex(currentIndex - 1);
@@ -78,8 +94,22 @@ const QuizQuestion = () => {
     }
   };
 
+  // Handle Answer Selection
   const handleAnswerChange = (option) => {
     setSelectedAnswer(option);
+  };
+
+  // Restart Quiz
+  const handleRestartQuiz = () => {
+    localStorage.removeItem("userAnswers"); // Clear stored answers
+    localStorage.removeItem("quizData"); // Clear saved quiz data
+    setCurrentIndex(0);
+    setSelectedAnswer("");
+    setCompleted(false);
+    setResults([]);
+    setUserAnswers([]);
+    setScore(0);
+    setPercentage(0);
   };
 
   // Loading State
@@ -122,25 +152,28 @@ const QuizQuestion = () => {
         </div>
       ) : (
         <div>
-          <h2>Congratulations!</h2>
-          <p>You have completed the quiz successfully.</p>
-          <div>
-            <h3>Results:</h3>
-            <ul>
-              {results.map((result, index) => (
-                <li key={index}>
-                  <strong>Question: </strong>{result.question}
-                  <br />
-                  <strong>Your Answer: </strong>{result.selectedAnswer} 
-                  <br />
-                  <strong>Correct Answer: </strong>{result.correctAnswer} 
-                  <span style={{ color: result.isCorrect ? "green" : "red" }}>
-                    {result.isCorrect ? "(Correct)" : "(Incorrect)"}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <h2>Quiz Completed!</h2>
+          <h3>Final Score: {score} / {questions.length}</h3>
+          <h3>Percentage: {percentage}%</h3>
+
+          <h3>Results:</h3>
+          <ul>
+            {results.map((result, index) => (
+              <li key={index}>
+                <strong>Question {index + 1}: </strong>
+                {result.question}
+                <br />
+                <strong>Your Answer: </strong>{result.userAnswer} 
+                <span style={{ color: result.isCorrect ? "green" : "red", fontWeight: "bold", marginLeft: "10px" }}>
+                  {result.isCorrect ? "(Correct)" : "(Incorrect)"}
+                </span>
+                <br />
+                <strong>Correct Answer: </strong>{result.correctAnswer}
+              </li>
+            ))}
+          </ul>
+
+          <button onClick={handleRestartQuiz}>Restart Quiz</button>
         </div>
       )}
 

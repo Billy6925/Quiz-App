@@ -1,34 +1,31 @@
-// src/contexts/QuizContext.js
 import React, { createContext, useState } from 'react';
 
 export const QuizContext = createContext();
 
 export const QuizProvider = ({ children }) => {
-  const [category, setCategory] = useState(null);
-  const [questions, setQuestions] = useState([]);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [score, setScore] = useState(0);
+    const [category, setCategory] = useState(null);
+    const [questions, setQuestions] = useState([]);
+    const [userAnswers, setUserAnswers] = useState([]);
 
-  const resetQuiz = () => {
-    setCurrentQuestionIndex(0);
-    setScore(0);
-    setQuestions([]);
-    setCategory(null);
-  };
+    const resetQuiz = () => {
+        setQuestions([]);
+        setUserAnswers([]);
+        setCategory(null);
+    };
 
-  return (
-    <QuizContext.Provider value={{
-      category,
-      setCategory,
-      questions,
-      setQuestions,
-      currentQuestionIndex,
-      setCurrentQuestionIndex,
-      score,
-      setScore,
-      resetQuiz
-    }}>
-      {children}
-    </QuizContext.Provider>
-  );
+    return (
+        <QuizContext.Provider
+            value={{
+                category,
+                setCategory,
+                questions,
+                setQuestions,
+                userAnswers,
+                setUserAnswers,
+                resetQuiz,
+            }}
+        >
+            {children}
+        </QuizContext.Provider>
+    );
 };

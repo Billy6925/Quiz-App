@@ -1,29 +1,37 @@
-import { Button } from 'react-bootstrap';
-import React, { useState, useEffect } from 'react';
+import { Button } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
-function Result({ userAnswers, restartQuiz }) {
+function Result({ restartQuiz }) {
     const [questions, setQuestions] = useState([]);
+    const [userAnswers, setUserAnswers] = useState([]);
     const [score, setScore] = useState(0);
+    const [percentage, setPercentage] = useState(0);
     const [results, setResults] = useState([]);
 
-    // Fetch questions from API to compare answers
+    const navigate = useNavigate(); // Navigation function
+
+    // Fetch questions and user answers from localStorage
     useEffect(() => {
-        const fetchQuestions = async () => {
-            try {
-                const response = await fetch("http://localhost:3000/questions");
-                const data = await response.json();
+        const storedAnswers = JSON.parse(localStorage.getItem("userAnswers")) || [];
+        setUserAnswers(storedAnswers);
+
+        const storedQuizData = JSON.parse(localStorage.getItem("lastQuizData"));
+        if (storedQuizData) {
+            setResults(storedQuizData.results || []);
+        }
+
+        fetch("http://localhost:3000/questions")
+            .then((response) => response.json())
+            .then((data) => {
                 setQuestions(data);
-                calculateScore(data);
-            } catch (error) {
-                console.error("Error fetching questions:", error);
-            }
-        };
+                calculateScore(data, storedAnswers);
+            })
+            .catch((error) => console.error("Error fetching questions:", error));
+    }, []);
 
-        fetchQuestions();
-    }, [correctAnswer]);
-
-    // Calculate the score and compare user answers with correct answers
-    const calculateScore = (questions) => {
+    // Calculate score and percentage
+    const calculateScore = (questions, userAnswers) => {
         let correctCount = 0;
         const resultsArray = userAnswers.map((userAnswer, index) => {
             const correctAnswer = questions[index]?.correctAnswer;
@@ -38,15 +46,18 @@ function Result({ userAnswers, restartQuiz }) {
             };
         });
 
-        // Calculate percentage score
-        const calculatedScore = (correctCount / questions.length) * 100;
-        setScore(calculatedScore);
+        const totalQuestions = questions.length;
+        const calculatedPercentage = totalQuestions > 0 ? (correctCount / totalQuestions) * 100 : 0;
+
+        setScore(correctCount);
+        setPercentage(calculatedPercentage.toFixed(2));
         setResults(resultsArray);
     };
 
     return (
         <>
-            <h2>Final Score: {score.toFixed(2)}%</h2>
+            <h2>Final Score: {score} / {questions.length}</h2>
+            <h2>Percentage: {percentage}%</h2>
             <h2>Results:</h2>
             <ul>
                 {results.map((result, index) => (
@@ -54,17 +65,25 @@ function Result({ userAnswers, restartQuiz }) {
                         <strong>Question {index + 1}: </strong>
                         {result.question}
                         <br />
-                        <strong>Your Answer: </strong>{result.userAnswer}
-                        <br />
-                        <strong>Correct Answer: </strong>{result.correctAnswer}
-                        <br />
-                        <span style={{ color: result.isCorrect ? "green" : "red" }}>
+                        <strong>Your Answer: </strong>{result.userAnswer} 
+                        <span style={{ color: result.isCorrect ? "green" : "red", fontWeight: "bold", marginLeft: "10px" }}>
                             {result.isCorrect ? "(Correct)" : "(Incorrect)"}
                         </span>
+                        <br />
+                        <strong>Correct Answer: </strong>{result.correctAnswer}
                     </li>
                 ))}
             </ul>
-            <Button onClick={restartQuiz}>Restart Quiz</Button>
+
+            {/* Buttons for navigation */}
+            <Button variant="primary" onClick={() => navigate("/categories")}>
+                Try Another Quiz
+            </Button>
+            <Button variant="secondary" onClick={() => navigate("/quiz-history")}>
+                View Summary
+            </Button>
+            
+           
         </>
     );
 }
