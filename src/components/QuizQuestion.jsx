@@ -1,8 +1,6 @@
-
 import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { QuizContext } from '../contexts/QuizContext';
-
 const QuizQuestion = () => {
     const { questions } = useContext(QuizContext);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -11,10 +9,10 @@ const QuizQuestion = () => {
     const [error, setError] = useState(null);
     const [userAnswers, setUserAnswers] = useState([]);
     const [completed, setCompleted] = useState(false);
+    const [showError, setShowError] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Load saved state from localStorage if it exists
         const savedState = localStorage.getItem('quizState');
         if (savedState) {
             const { currentIndex: savedIndex, userAnswers: savedAnswers } = JSON.parse(savedState);
@@ -25,7 +23,6 @@ const QuizQuestion = () => {
         setLoading(false);
     }, []);
 
-    // Save state to localStorage whenever it changes
     useEffect(() => {
         if (!loading && questions.length > 0) {
             localStorage.setItem('quizState', JSON.stringify({
@@ -37,20 +34,24 @@ const QuizQuestion = () => {
 
     const handleAnswerSelection = (option) => {
         setSelectedAnswer(option);
-        // Update userAnswers immediately when selection changes
+        setShowError(false);
         const newAnswers = [...userAnswers];
         newAnswers[currentIndex] = option;
         setUserAnswers(newAnswers);
     };
 
     const handleNext = () => {
-        if (selectedAnswer) {
-            if (currentIndex < questions.length - 1) {
-                setCurrentIndex(currentIndex + 1);
-                setSelectedAnswer(userAnswers[currentIndex + 1] || "");
-            } else {
-                completeQuiz();
-            }
+        if (!selectedAnswer) {
+            setShowError(true);
+            return;
+        }
+        
+        if (currentIndex < questions.length - 1) {
+            setCurrentIndex(currentIndex + 1);
+            setSelectedAnswer(userAnswers[currentIndex + 1] || "");
+            setShowError(false);
+        } else {
+            completeQuiz();
         }
     };
 
@@ -58,12 +59,12 @@ const QuizQuestion = () => {
         if (currentIndex > 0) {
             setCurrentIndex(currentIndex - 1);
             setSelectedAnswer(userAnswers[currentIndex - 1] || "");
+            setShowError(false);
         }
     };
 
     const completeQuiz = () => {
         setCompleted(true);
-        // Save final quiz data to localStorage
         localStorage.setItem("lastQuizData", JSON.stringify({
             questions: questions,
             results: questions.map((q, index) => ({
@@ -73,7 +74,6 @@ const QuizQuestion = () => {
                 isCorrect: userAnswers[index] === q.correctAnswer
             }))
         }));
-        // Clear quiz state
         localStorage.removeItem('quizState');
         navigate("/results");
     };
@@ -87,24 +87,25 @@ const QuizQuestion = () => {
 
     return (
         <div className="max-w-2xl mx-auto p-6">
-            {/* Progress bar */}
-           
-<div className="mb-6">
-    <div className="w-full h-3 bg-gray-200 rounded-full">
-        <div 
-            className="progress-bar" 
-            style={{ width: `${progress}%` }} 
-        />
-    </div>
-    <div className="text-center mt-2 text-gray-600">
-        Question {currentIndex + 1} of {questions.length}
-    </div>
-</div>
+            <div className="mb-6">
+                <div className="w-full h-3 bg-gray-200 rounded-full">
+                    <div 
+                        className="progress-bar" 
+                        style={{ width: `${progress}%` }} 
+                    />
+                </div>
+                <div className="text-center mt-2 text-gray-600">
+                    Question {currentIndex + 1} of {questions.length}
+                </div>
+            </div>
 
-
-            {/* Question */}
             <div className="mb-8">
                 <h2 className="text-xl font-semibold mb-4">{currentQuestion.question}</h2>
+                {showError && (
+                    <div className="text">
+                        Please answer the question before proceeding!
+                    </div>
+                )}
                 <ul className="space-y-3">
                     {currentQuestion.options.map((option, index) => (
                         <li key={index}>
@@ -124,7 +125,6 @@ const QuizQuestion = () => {
                 </ul>
             </div>
 
-            {/* Navigation buttons */}
             <div className="flex justify-between mt-6">
                 <button
                     onClick={handlePrevious}
@@ -135,8 +135,7 @@ const QuizQuestion = () => {
                 </button>
                 <button
                     onClick={handleNext}
-                    disabled={!selectedAnswer}
-                    className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-600 transition-colors"
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
                 >
                     {currentIndex === questions.length - 1 ? "Finish" : "Next"}
                 </button>

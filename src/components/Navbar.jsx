@@ -6,7 +6,7 @@ export default function Navbar() {
           <ul>
           
            <li><Link to="/">Categories</Link></li>
-          
+           <li><Link to="/quiz">Quiz</Link></li>
            <li><Link to="/results">Results</Link></li>
            <li><Link to="/summary">Summary</Link></li>  
         

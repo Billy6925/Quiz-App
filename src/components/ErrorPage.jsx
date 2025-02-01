@@ -3,18 +3,20 @@ import Navbar from "./Navbar";
 
 function ErrorPage() {
 const error = useRouteError();
-console.error(error)
+
 
 return(
     <>
     <header>
-        <NavBar/>
+       <Navbar/> 
     </header>
     <main>
         <h2>Error</h2>
-<p>Oops! Something went wrong.</p>
+<h1>Oops! Something went wrong.</h1>
     </main>
     </>
-)
+);
 }
 export default ErrorPage;
+
+
