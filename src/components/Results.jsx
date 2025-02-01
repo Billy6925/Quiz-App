@@ -46,14 +46,9 @@ const Result = () => {
   const handleTryAnother = async () => {
     setIsLoading(true);
     try {
-      // Clear localStorage items
       localStorage.removeItem("userAnswers");
       localStorage.removeItem("lastQuizData");
-      
-      // Simulate some loading time (you can remove this in production)
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Navigate to categories
       navigate("/categories");
     } catch (error) {
       console.error("Navigation error:", error);
@@ -61,12 +56,23 @@ const Result = () => {
     }
   };
 
+  const handleRestartQuiz = () => {
+    setIsLoading(true);
+    setTimeout(() => {
+      localStorage.removeItem("userAnswers");
+      localStorage.removeItem("lastQuizData");
+      setScore(0);
+      setPercentage(0);
+      navigate("/quiz"); // Ensure user is redirected to the quiz start
+    }, 1000);
+  };
+
   if (isLoading) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-white">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
-          <div className="text-lg font-semibold text-gray-700">Loading Categories...</div>
+          <div className="text-lg font-semibold text-gray-700">Loading...</div>
         </div>
       </div>
     );
@@ -106,19 +112,22 @@ const Result = () => {
         </div>
 
         <div className="mt-8 flex justify-center gap-4">
-        <button
-  onClick={() => {
-    setIsLoading(true);
-    setTimeout(() => {
-      navigate('/categories');
-    }, 1000);
-  }}
-  disabled={isLoading}
-  className={`px-6 py-2 bg-blue-600 text-white rounded-lg transition-colors duration-200 
-    ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'}`}
->
-  {isLoading ? 'Loading...' : 'Try Another Quiz'}
-</button>
+          <button
+            onClick={handleTryAnother}
+            disabled={isLoading}
+            className={`px-6 py-2 bg-blue-600 text-white rounded-lg transition-colors duration-200 
+              ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'}`}
+          >
+            {isLoading ? 'Loading...' : 'Try Another Quiz'}
+          </button>
+          <button
+            onClick={handleRestartQuiz}
+            disabled={isLoading}
+            className={`px-6 py-2 bg-green-600 text-white rounded-lg transition-colors duration-200 
+              ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-700'}`}
+          >
+            {isLoading ? 'Restarting...' : 'Restart Quiz'}
+          </button>
           <button
             onClick={() => navigate("/summary")}
             disabled={isLoading}
