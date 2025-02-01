@@ -8,6 +8,7 @@ export default function Navbar() {
            <li><Link to="/quiz">Quiz</Link></li>
            <li><Link to="/results">Results</Link></li>
            <li><Link to="/summary">Summary</Link></li>  
+        
           </ul>
         </nav>
       );
