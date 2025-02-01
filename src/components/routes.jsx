@@ -21,9 +21,10 @@ element: <Results/>,
 errorElement: <ErrorPage/>
 },
 {
-    path: "/category",
+    path: "/categories",
     element: <CategorySelector/>,
     errorElement: <ErrorPage/>
+    
 }
 ])
 export default routes;

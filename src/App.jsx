@@ -19,6 +19,7 @@ function App() {
                     <Route path="/quiz" element={<QuizQuestions />} />
                     <Route path="/summary" element={<QuizSummary />} />
                     <Route path="/results" element={<Results />} />
+                    <Route path="/" element={<CategorySelector />} />
                 </Routes>
             </Router>
         </QuizProvider>

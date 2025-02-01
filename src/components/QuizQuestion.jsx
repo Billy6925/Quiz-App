@@ -88,18 +88,19 @@ const QuizQuestion = () => {
     return (
         <div className="max-w-2xl mx-auto p-6">
             {/* Progress bar */}
-            <div className="mb-6">
-            <div className="w-full h-3 bg-gray-200 rounded-full">
-    <div 
-        className="progress-bar"
-        style={{ width: `${progress}%` }}
-    />
+           
+<div className="mb-6">
+    <div className="w-full h-3 bg-gray-200 rounded-full">
+        <div 
+            className="progress-bar" 
+            style={{ width: `${progress}%` }} 
+        />
+    </div>
+    <div className="text-center mt-2 text-gray-600">
+        Question {currentIndex + 1} of {questions.length}
+    </div>
 </div>
 
-                <div className="text-center mt-2 text-gray-600">
-                    Question {currentIndex + 1} of {questions.length}
-                </div>
-            </div>
 
             {/* Question */}
             <div className="mb-8">

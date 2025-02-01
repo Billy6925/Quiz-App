@@ -1,13 +1,13 @@
-import { Button } from "react-bootstrap";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-function Result() {
+const Result = () => {
   const [questions, setQuestions] = useState([]);
   const [userAnswers, setUserAnswers] = useState([]);
   const [score, setScore] = useState(0);
   const [percentage, setPercentage] = useState(0);
   const [results, setResults] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -19,7 +19,6 @@ function Result() {
     setQuestions(storedQuizData.questions || []);
     setResults(storedQuizData.results || []);
 
-    // Calculate score based on stored results
     if (storedQuizData.results) {
       const correctCount = storedQuizData.results.filter(r => r.isCorrect).length;
       const total = storedQuizData.results.length;
@@ -27,70 +26,111 @@ function Result() {
       setPercentage(((correctCount / total) * 100).toFixed(2));
     }
     
-    // Save quiz results to history
     completeQuiz(storedQuizData);
   }, []);
 
-  // Function to save quiz history
   const completeQuiz = (quizData) => {
-    if (!quizData.results) return; // Prevent saving empty quiz data
+    if (!quizData.results) return;
 
     const newQuizData = {
       questions: quizData.questions,
       results: quizData.results,
     };
 
-    // Get existing quiz history from localStorage
     const existingHistory = JSON.parse(localStorage.getItem("quizHistory")) || [];
-
-    // Add the new quiz data to the history
-    existingHistory.unshift(newQuizData); // Unshift to add to the beginning (most recent first)
-
-    // Store the updated history in localStorage
+    existingHistory.unshift(newQuizData);
     localStorage.setItem("quizHistory", JSON.stringify(existingHistory));
-
-    // Clear current quiz state
     localStorage.removeItem('quizState');
   };
 
-  return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold mb-4">Final Score: {score} / {questions.length}</h2>
-      <h2 className="text-xl mb-4">Percentage: {percentage}%</h2>
-      <h2 className="text-xl mb-4">Results:</h2>
+  const handleTryAnother = async () => {
+    setIsLoading(true);
+    try {
+      // Clear localStorage items
+      localStorage.removeItem("userAnswers");
+      localStorage.removeItem("lastQuizData");
       
-      <ul className="space-y-4">
-        {results.map((result, index) => (
-          <li key={index} className="border p-4 rounded">
-            <strong>Question {index + 1}: </strong>
-            {result.question}
-            <br />
-            <strong>Your Answer: </strong>
-            <span style={{ 
-              color: result.isCorrect ? "green" : "red",
-              fontWeight: "bold"
-            }}>
-              {result.userAnswer}
-              {result.isCorrect ? " ✓" : " ✗"}
-            </span>
-            <br />
-            {!result.isCorrect && (
-              <><strong>Correct Answer: </strong>{result.correctAnswer}<br /></>
-            )}
-          </li>
-        ))}
-      </ul>
+      // Simulate some loading time (you can remove this in production)
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Navigate to categories
+      navigate("/categories");
+    } catch (error) {
+      console.error("Navigation error:", error);
+      setIsLoading(false);
+    }
+  };
 
-      <div className="mt-6 space-x-4">
-        <Button variant="primary" onClick={() => navigate("/categories")}>
-          Try Another Quiz
-        </Button>
-        <Button variant="secondary" onClick={() => navigate("/summary")}>
-          View Summary
-        </Button>
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-white">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+          <div className="text-lg font-semibold text-gray-700">Loading Categories...</div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto p-6">
+      <div className="bg-white rounded-lg shadow-lg p-8">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-gray-800 mb-2">Quiz Results</h2>
+          <div className="flex justify-center gap-8">
+            <div className="text-lg">
+              <span className="font-semibold">Score:</span> {score} / {questions.length}
+            </div>
+            <div className="text-lg">
+              <span className="font-semibold">Percentage:</span> {percentage}%
+            </div>
+          </div>
+        </div>
+        
+        <div className="space-y-4">
+          {results.map((result, index) => (
+            <div key={index} className="border rounded-lg p-4 bg-gray-50">
+              <div className="font-semibold mb-2">Question {index + 1}:</div>
+              <div className="mb-2">{result.question}</div>
+              <div className={`mb-1 ${result.isCorrect ? 'text-green-600' : 'text-red-600'}`}>
+                <span className="font-medium">Your Answer:</span> {result.userAnswer}
+                <span className="ml-2">{result.isCorrect ? "✓" : "✗"}</span>
+              </div>
+              {!result.isCorrect && (
+                <div className="text-gray-700">
+                  <span className="font-medium">Correct Answer:</span> {result.correctAnswer}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-8 flex justify-center gap-4">
+        <button
+  onClick={() => {
+    setIsLoading(true);
+    setTimeout(() => {
+      navigate('/categories');
+    }, 1000);
+  }}
+  disabled={isLoading}
+  className={`px-6 py-2 bg-blue-600 text-white rounded-lg transition-colors duration-200 
+    ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'}`}
+>
+  {isLoading ? 'Loading...' : 'Try Another Quiz'}
+</button>
+          <button
+            onClick={() => navigate("/summary")}
+            disabled={isLoading}
+            className={`px-6 py-2 bg-gray-600 text-white rounded-lg transition-colors duration-200 
+              ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-700'}`}
+          >
+            View Summary
+          </button>
+        </div>
       </div>
     </div>
   );
-}
+};
 
 export default Result;

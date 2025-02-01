@@ -1,44 +1,70 @@
 
 import React, { useState, useEffect } from "react";
-import Navbar from "./Navbar.jsx";
 
 function QuizSummary() {
     const [quizHistory, setQuizHistory] = useState([]);
 
     useEffect(() => {
-        // Fetch quiz history from localStorage
         const storedHistory = JSON.parse(localStorage.getItem("quizHistory")) || [];
-        setQuizHistory(Array.isArray(storedHistory) ? storedHistory.reverse() : []);
+        setQuizHistory(
+            Array.isArray(storedHistory)
+                ? storedHistory.filter((quiz, index, self) =>
+                    index === self.findIndex(q => JSON.stringify(q) === JSON.stringify(quiz))
+                )
+                : []
+        );
     }, []);
 
     return (
-        <>
-            <header>
-                
-            </header>
-            <div>
-                <h2>Quiz Summary</h2>
-                {quizHistory.length > 0 ? (
-                    quizHistory.map((quiz, index) => (
-                        <main key={index}>
-                            <h3>Quiz {quizHistory.length - index}</h3>
-                            <p>Categories: {(quiz.categories && Array.isArray(quiz.categories)) ? quiz.categories.join(', ') : "No categories available"}</p>
-                            <p>Questions Completed: {quiz.questionsCompleted || (quiz.answers ? quiz.answers.length : 0)}</p>
-                            <p>Correct Answers: {quiz.correctAnswers || (quiz.answers ? quiz.answers.filter(a => a.isCorrect).length : 0)}</p>
-                            <ul>
-                                {(quiz.answers && Array.isArray(quiz.answers)) ? quiz.answers.map((answer, idx) => (
-                                    <li key={idx}>
-                                        Question {idx + 1}: {answer.userAnswer || 'N/A'} - Correct: {answer.correctAnswer || 'N/A'}
-                                    </li>
-                                )) : <li>No answers recorded.</li>}
-                            </ul>
-                        </main>
-                    ))
-                ) : (
-                    <p>No quiz history available. Take a quiz to see your results here!</p>
-                )}
-            </div>
-        </>
+        <div className="container">
+            <h2 className="title">Quiz Summary</h2>
+            {quizHistory.length > 0 ? (
+                quizHistory.map((quiz, index) => (
+                    <QuizItem key={index} quiz={quiz} index={quizHistory.length - index} />
+                ))
+            ) : (
+                <p className="message">No quiz history available. Take a quiz to see your results here!</p>
+            )}
+        </div>
+    );
+}
+
+function QuizItem({ quiz, index }) {
+    const total = quiz.results.length;
+    const score = quiz.results.filter(r => r.isCorrect).length;
+    const percentage = ((score / total) * 100).toFixed(2);
+
+    return (
+        <div className="quiz-card">
+            <h3 className="quiz-title">Quiz {index}</h3>
+            <p className="quiz-score">Final Score: {score} / {total}</p>
+            <p className="quiz-percentage">Percentage: {percentage}%</p>
+            <h4 className="results-title">Results:</h4>
+            <ul className="results-list">
+                {quiz.results.map((result, idx) => (
+                    <QuizResult key={idx} result={result} idx={idx} />
+                ))}
+            </ul>
+        </div>
+    );
+}
+
+function QuizResult({ result, idx }) {
+    return (
+        <li className="result-item">
+            <strong>Question {idx + 1}: </strong>{result.question}
+            <br />
+            <strong>Your Answer: </strong>
+            <span className={result.isCorrect ? "correct" : "incorrect"}>
+                {result.userAnswer} {result.isCorrect ? "✓" : "✗"}
+            </span>
+            {!result.isCorrect && (
+                <>
+                    <br />
+                    <strong>Correct Answer: </strong>{result.correctAnswer}
+                </>
+            )}
+        </li>
     );
 }
 
